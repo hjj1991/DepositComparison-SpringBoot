@@ -3,7 +3,7 @@ package com.myhome.config.security;
 import com.myhome.domain.token.TokenEntity;
 import com.myhome.domain.token.TokenRepository;
 import com.myhome.domain.user.Role;
-import com.myhome.service.user.UserService;
+import com.myhome.domain.user.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

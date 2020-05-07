@@ -8,6 +8,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @EnableJpaAuditing
 @SpringBootApplication
@@ -24,6 +25,7 @@ public class Application {
         HiddenHttpMethodFilter filter = new HiddenHttpMethodFilter();
         return filter;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

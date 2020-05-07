@@ -1,9 +1,7 @@
-package com.myhome.config.auth;
+package com.myhome.config.auth.service;
 
 import com.myhome.config.auth.dto.OAuthAttributes;
-import com.myhome.config.auth.dto.SessionUser;
 import com.myhome.domain.user.Role;
-import com.myhome.domain.user.UserEntity;
 import com.myhome.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

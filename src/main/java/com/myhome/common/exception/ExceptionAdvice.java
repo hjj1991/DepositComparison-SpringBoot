@@ -37,7 +37,13 @@ public class ExceptionAdvice {
 
     @ExceptionHandler(CAuthenticationEntryPointException.class)
     public CommonResponseDto authenticationEntryPointException(HttpServletRequest request, CAuthenticationEntryPointException e) {
-        return responseService.getFailResult(Integer.valueOf(getMessage("entryPointException.code")), getMessage("entryPointException.msg"));
+        return responseService.getFailResult(Integer.valueOf(getMessage("-1")), getMessage("인증이 필요합니다."));
+    }
+
+    @ExceptionHandler(CCommunicationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public CommonResponseDto communicationException(HttpServletRequest request, CCommunicationException e) {
+        return responseService.getFailResult(Integer.valueOf(getMessage("-1")), getMessage("통신중 오류가 발생하였습니다."));
     }
 
     private String getMessage(String string) {

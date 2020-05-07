@@ -37,5 +37,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'io.springfox:springfox-swagger-ui:2.6.1'
     implementation 'org.springframework.boot:spring-boot-devtools'
+    // https://mvnrepository.com/artifact/com.github.gavlyukovskiy/p6spy-spring-boot-starter
+    compile group: 'com.github.gavlyukovskiy', name: 'p6spy-spring-boot-starter', version: '1.6.1'
+
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

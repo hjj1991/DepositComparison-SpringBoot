@@ -1,5 +1,6 @@
-package com.myhome.config.auth;
+package com.myhome.config.auth.service;
 
+import com.myhome.common.exception.CCommunicationException;
 import com.myhome.config.auth.dto.KaKaoProfileDto;
 import com.myhome.config.auth.dto.KaKaoTokenDto;
 import com.myhome.config.auth.dto.NaverProfileDto;
@@ -8,12 +9,11 @@ import com.myhome.domain.user.Role;
 import com.myhome.domain.user.UserEntity;
 import com.myhome.domain.user.UserRepository;
 import com.myhome.domain.user.dto.UserSignRequestDto;
-import com.myhome.service.user.SignService;
-import com.myhome.service.user.UserService;
+import com.myhome.domain.user.service.SignService;
 import lombok.RequiredArgsConstructor;
-import org.h2.engine.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -36,6 +36,22 @@ public class SocialLoginService {
     private final UserRepository userRepository;
     private final SignService signService;
 
+    @Value(value = "${social.kakao.url.profile}")
+    private String kakaoProfileUrl;
+    @Value(value = "${social.kakao.client_id}")
+    private String kakaoClientId;
+    @Value(value = "${social.kakao.redirect}")
+    private String kakaoRedirectUrl;
+    @Value(value = "${social.kakao.url.token}")
+    private String getKaKaoTokenUrl;
+
+    @Value(value = "${social.naver.url.profile}")
+    private String naverProfileUrl;
+    @Value(value = "${social.naver.client_id}")
+    private String naverClientId;
+    @Value(value = "${social.naver.client_secret}")
+    private String naverClientSecret;
+
 
     private WebClient webClient = WebClient.builder()
 //            .baseUrl("https://kauth.kakao.com/")
@@ -52,28 +68,32 @@ public class SocialLoginService {
     }
 
     public KaKaoProfileDto getKakaoProfile(String accessToken) {
-        // Set parameter
-        ClientResponse response = webClient.post()
-                .uri("https://kapi.kakao.com/v2/user/me")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED) // Set header : Content-type: application/x-www-form-urlencoded
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .block();
-        if (response.statusCode().is2xxSuccessful()) {
-            return response.bodyToMono(KaKaoProfileDto.class).block();
+        try {
+            // Set parameter
+            ClientResponse response = webClient.post()
+                    .uri(kakaoProfileUrl)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED) // Set header : Content-type: application/x-www-form-urlencoded
+                    .header("Authorization", "Bearer " + accessToken)
+                    .exchange()
+                    .block();
+            if (response.statusCode().is2xxSuccessful()) {
+                return response.bodyToMono(KaKaoProfileDto.class).block();
+            }
+        } catch (Exception e){
+            throw new CCommunicationException();
         }
-        return null;
+        throw new CCommunicationException();
     }
 
     public HashMap<String, String> getKakaoTokenInfo(String code) throws Exception {
         // Set parameter
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "656c5afa5455de8f5ad9eb51e09e3720");
-        params.add("redirect_uri", "http://localhost:3000/sociallogin?provider=kakao");
+        params.add("client_id", kakaoClientId);
+        params.add("redirect_uri", kakaoRedirectUrl);
         params.add("code", code);
         ClientResponse response = webClient.post()
-                .uri("https://kauth.kakao.com/oauth/token")
+                .uri(getKaKaoTokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED) // Set header : Content-type: application/x-www-form-urlencoded
                 .body(BodyInserters.fromFormData(params))
                 .exchange()
@@ -104,21 +124,24 @@ public class SocialLoginService {
                 }
             }
         }
-        return null;
+        throw new CCommunicationException();
     }
 
     public NaverProfileDto getNaverProfile(String accessToken) {
-        // Set parameter
-        log.error(accessToken);
-        ClientResponse response = webClient.get()
-                .uri("https://openapi.naver.com/v1/nid/me")
-                .header("Authorization", "Bearer " + accessToken)
-                .exchange()
-                .block();
-        if (response.statusCode().is2xxSuccessful()) {
-            return response.bodyToMono(NaverProfileDto.class).block();
+        try {
+            // Set parameter
+            ClientResponse response = webClient.get()
+                    .uri(naverProfileUrl)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .exchange()
+                    .block();
+            if (response.statusCode().is2xxSuccessful()) {
+                return response.bodyToMono(NaverProfileDto.class).block();
+            }
+        }catch (Exception e){
+            throw new CCommunicationException();
         }
-        return null;
+        throw new CCommunicationException();
     }
 
     public HashMap<String, String> getNaverTokenInfo(String code) throws Exception {
@@ -127,8 +150,8 @@ public class SocialLoginService {
                 .uri(uriBuilder -> uriBuilder.scheme("https")
                         .host("nid.naver.com")
                         .path("oauth2.0/token")
-                        .queryParam("client_id", "sUyp7Y2KoOfRvdsAEdCc")
-                        .queryParam("client_secret", "QjKMK_CkHV")
+                        .queryParam("client_id", naverClientId)
+                        .queryParam("client_secret", naverClientSecret)
                         .queryParam("grant_type", "authorization_code")
                         .queryParam("code", code)
                         .queryParam("state", "hLiDdL2uhPtsftcU")
@@ -161,6 +184,6 @@ public class SocialLoginService {
                 }
             }
         }
-        return null;
+        throw new CCommunicationException();
     }
 }

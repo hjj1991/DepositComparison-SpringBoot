@@ -1,4 +1,4 @@
-package com.myhome.service.user;
+package com.myhome.domain.user.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

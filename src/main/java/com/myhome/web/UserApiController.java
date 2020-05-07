@@ -7,23 +7,22 @@ import com.myhome.common.exception.CUserNotFoundException;
 import com.myhome.common.exception.PasswordNotMatchException;
 import com.myhome.common.service.ResponseService;
 import com.myhome.config.security.JwtTokenProvider;
+import com.myhome.domain.invest.service.InstallmentSavingService;
 import com.myhome.domain.user.UserEntity;
 import com.myhome.domain.user.UserRepository;
 import com.myhome.domain.user.dto.UserDetailResponseDto;
 import com.myhome.domain.user.dto.UserSignInRequestDto;
 import com.myhome.domain.user.dto.UserSignRequestDto;
-import com.myhome.service.user.SignService;
-import com.myhome.service.user.UserService;
+import com.myhome.domain.user.service.SignService;
+import com.myhome.domain.user.service.UserService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,7 @@ public class UserApiController {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final InstallmentSavingService installmentSavingService;
 
     @ApiOperation(value = "가입", notes = "회원가입을 한다.")
     @PostMapping(value = "/signup")
@@ -95,7 +95,7 @@ public class UserApiController {
     @ApiOperation(value = "중복아이디 체크", notes = "아이디 입력")
     @GetMapping(value = "/user/check/{userId}")
     public SingleResponseDto<Boolean> checkId(@ApiParam(value = "회원ID", required = true) @PathVariable String userId) {
-
+        installmentSavingService.getInstallmentSavingList();
         return responseService.getSingleResponse(userRepository.existsByUserId(userId));
     }
 
