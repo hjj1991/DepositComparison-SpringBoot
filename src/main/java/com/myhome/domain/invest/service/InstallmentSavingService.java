@@ -46,7 +46,7 @@ public class InstallmentSavingService {
     }
 
     @Transactional
-    public void getInstallmentSavingList() {
+    public List<InstallmentSavingEntity> getInstallmentSavingList() {
         int pageNo = 1;
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
@@ -56,6 +56,7 @@ public class InstallmentSavingService {
         params.add("auth", "37cc4a0dc642205bb06d557239e72e77");
         params.add("topFinGrpNo", "020000");
         params.add("pageNo", String.valueOf(pageNo));
+        List<InstallmentSavingEntity> result = new ArrayList<InstallmentSavingEntity>();
         while(true){
             ClientResponse response = webClient.get()
                     .uri((uriBuilder) -> uriBuilder.scheme("http")
@@ -96,7 +97,8 @@ public class InstallmentSavingService {
                 installmentSavingEntity.setOptions(optionEntities);
             }
 
-            installmentSavingRepository.saveAll(installmentSavingEntityList);
+            result.addAll(installmentSavingEntityList);
+//            installmentSavingRepository.saveAll(installmentSavingEntityList);
 
             if(pageNo < Integer.valueOf(installmentSavingDto.getResult().getMaxPageNo())){
                 pageNo++;
@@ -104,6 +106,7 @@ public class InstallmentSavingService {
                 break;
             }
         }
+        return result;
 
     }
 

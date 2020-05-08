@@ -39,7 +39,6 @@ public class UserApiController {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
-    private final InstallmentSavingService installmentSavingService;
 
     @ApiOperation(value = "가입", notes = "회원가입을 한다.")
     @PostMapping(value = "/signup")
@@ -95,7 +94,6 @@ public class UserApiController {
     @ApiOperation(value = "중복아이디 체크", notes = "아이디 입력")
     @GetMapping(value = "/user/check/{userId}")
     public SingleResponseDto<Boolean> checkId(@ApiParam(value = "회원ID", required = true) @PathVariable String userId) {
-        installmentSavingService.getInstallmentSavingList();
         return responseService.getSingleResponse(userRepository.existsByUserId(userId));
     }
 
