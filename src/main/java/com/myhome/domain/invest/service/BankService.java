@@ -1,17 +1,14 @@
 package com.myhome.domain.invest.service;
 
 import com.myhome.domain.invest.*;
+import com.myhome.domain.invest.dto.BankDto;
 import com.myhome.domain.invest.dto.InstallmentSavingDto;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,15 +24,13 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
-public class InstallmentSavingService {
+@RequiredArgsConstructor
+public class BankService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final InstallmentSavingRepository installmentSavingRepository;
-    private final InstallmentSavingOptionRepository installmentSavingOptionRepository;
-    @Autowired
-    private BankRepository bankRepository;
+    private final BankRepository bankRepository;
+    private final BankBranchRepository bankBranchRepository;
 
     private WebClient webClient = WebClient.builder()
 //            .baseUrl("https://kauth.kakao.com/")
@@ -58,9 +53,10 @@ public class InstallmentSavingService {
 //    }
 
 
-    @Transactional
-    public void getInstallmentSavingList(String topFinGrpNo) {
+
+    public void getBankList(String topFinGrpNo) {
         int pageNo = 1;
+
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
                 .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE)
@@ -69,56 +65,60 @@ public class InstallmentSavingService {
         params.add("auth", "37cc4a0dc642205bb06d557239e72e77");
         params.add("topFinGrpNo", topFinGrpNo);
         params.add("pageNo", String.valueOf(pageNo));
+        List<BankEntity> result = new ArrayList<BankEntity>();
         while(true){
             ClientResponse response = webClient.get()
                     .uri((uriBuilder) -> uriBuilder.scheme("http")
 
                             .host("finlife.fss.or.kr")
-                            .path("finlifeapi/savingProductsSearch.json")
+                            .path("finlifeapi/companySearch.json")
                             .queryParams(params)
                             .build())
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .block();
 
-            InstallmentSavingDto installmentSavingDto = response.bodyToMono(InstallmentSavingDto.class).block();
-            List<InstallmentSavingEntity> installmentSavingEntityList = installmentSavingDto.getResult().getBaseList().stream().map(new Function<InstallmentSavingDto.Baselist, InstallmentSavingEntity>() {
+            BankDto bankDto = response.bodyToMono(BankDto.class).block();
+            List<BankEntity> bankEntityList = bankDto.getResult().getBaseList().stream().map(new Function<BankDto.Baselist, BankEntity>() {
                 @Override
-                public InstallmentSavingEntity apply(InstallmentSavingDto.Baselist baselist) {
-                    InstallmentSavingEntity tempEntity = new InstallmentSavingEntity();
-                    tempEntity = modelMapper.map(baselist, InstallmentSavingEntity.class);
-                    String finPrdtCd = tempEntity.getFinPrdtCd();
-                    List<InstallmentSavingOptionEntity> installmentSavingOptionEntityList = installmentSavingDto.getResult().getOptionList().stream().map(new Function<InstallmentSavingDto.Optionlist, InstallmentSavingOptionEntity>() {
+                public BankEntity apply(BankDto.Baselist baselist) {
+                    String bankRole;
+                    if(topFinGrpNo.equals("020000")) {
+                        bankRole = "은행";
+                    }else if(topFinGrpNo.equals("030300")) {
+                        bankRole = "저축은행";
+                    }else {
+                        bankRole = "없음";
+                    }
+                    BankEntity tempEntity = new BankEntity();
+                    tempEntity = modelMapper.map(baselist, BankEntity.class);
+                    String finCoNo = tempEntity.getFinCoNo();
+                    List<BankBranchEntity> resultList = new ArrayList<>();
+                    List<BankBranchEntity> bankBranchEntityList = bankDto.getResult().getOptionList().stream().map(new Function<BankDto.Optionlist, BankBranchEntity>() {
                         @Override
-                        public InstallmentSavingOptionEntity apply(InstallmentSavingDto.Optionlist optionlist){
-                            InstallmentSavingOptionEntity tempEntity2 = new InstallmentSavingOptionEntity();
-                            tempEntity2 = modelMapper.map(optionlist, InstallmentSavingOptionEntity.class);
-
-
+                        public BankBranchEntity apply(BankDto.Optionlist optionlist) {
+                            BankBranchEntity tempEntity2 = new BankBranchEntity();
+                            tempEntity2 = modelMapper.map(optionlist, BankBranchEntity.class);
                             return tempEntity2;
                         }
-                    }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd)).collect(Collectors.toList());
-                    List<InstallmentSavingOptionEntity> resultList = new ArrayList<>();
-//                    for(InstallmentSavingOptionEntity installmentSavingOptionEntity: installmentSavingOptionEntityList){
-//                        if(installmentSavingOptionEntity.getFinPrdtCd().equals(finPrdtCd)){
-//                            resultList.add(installmentSavingOptionEntity);
-//                        }
+                    }).filter(t -> t.getFinCoNo().equals(finCoNo)).collect(Collectors.toList());
+//                    for(BankBranchEntity bankBranchEntity: bankBranchEntityList){
+//                        if(bankBranchEntity.getFinCoNo().equals(finCoNo))
+//                            resultList.add(bankBranchEntity);
 //                    }
-                    tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), installmentSavingOptionEntityList);
-//                    System.out.println(tempEntity.toString());
-//                    System.out.println("호이호이호이");
-//                    System.out.println(installmentSavingOptionEntityList.size());
-                    for(InstallmentSavingOptionEntity installmentSavingOptionEntity: installmentSavingOptionEntityList){
-//                        System.out.println(installmentSavingOptionEntity.toString());
-                    }
-                    installmentSavingRepository.save(tempEntity);
+                    tempEntity.update(bankRole, bankBranchEntityList);
+//                    tempEntity.setBankBranchList(bankBranchEntityList);
+
+
                     return tempEntity;
                 }
             }).collect(Collectors.toList());
 
-//            installmentSavingRepository.saveAll(installmentSavingEntityList);
 
-            if(pageNo < Integer.valueOf(installmentSavingDto.getResult().getMaxPageNo())){
+
+            bankRepository.saveAll(bankEntityList);
+
+            if(pageNo < Integer.valueOf(bankDto.getResult().getMaxPageNo())){
                 pageNo++;
             }else{
                 break;

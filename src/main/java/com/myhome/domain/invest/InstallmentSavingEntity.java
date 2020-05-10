@@ -1,23 +1,21 @@
 package com.myhome.domain.invest;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @NoArgsConstructor
 @Getter
-@Setter
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
 @Table(name = "tbl_installment_saving")
 @Entity
+@ToString
 public class InstallmentSavingEntity {
 
     @Id
@@ -25,7 +23,7 @@ public class InstallmentSavingEntity {
     private Long id;
 
     @Column//최고한도
-    private long maxLimit;
+    private Long maxLimit;
     @Column(columnDefinition = "varchar(2000)")//우대조건
     private String spclCnd;
     @Column(columnDefinition = "varchar(2000)")//만기 후 이자율
@@ -53,14 +51,18 @@ public class InstallmentSavingEntity {
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name="installmentSavingOptionEntity_finPrdtCd")
+    @JoinColumn(name="installmentSavingEntity_id")
     private List<InstallmentSavingOptionEntity> options;
+
+    @ManyToOne(cascade = CascadeType.ALL,  optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name="bankEntity_id", nullable = true)
+    private BankEntity bankInfo;
 
     @Builder
     private InstallmentSavingEntity(long maxLimit, String spclCnd, String mtrtInt,
                                     String joinMember, String joinWay, String joinDeny,
                                     String korCoNm, String finCoNo, String finPrdtCd,
-                                    String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay, List<InstallmentSavingOptionEntity> options) {
+                                    String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay, List<InstallmentSavingOptionEntity> options, BankEntity bankInfo) {
         this.maxLimit = maxLimit;
         this.spclCnd = spclCnd;
         this.mtrtInt = mtrtInt;
@@ -75,5 +77,16 @@ public class InstallmentSavingEntity {
         this.dclsMonth = dclsMonth;
         this.finCoSubmDay = finCoSubmDay;
         this.options = options;
+        this.bankInfo = bankInfo;
+    }
+
+    public InstallmentSavingEntity update(BankEntity bankInfo, List<InstallmentSavingOptionEntity> options){
+        this.bankInfo = bankInfo;
+        this.options = options;
+        return this;
+    }
+    public InstallmentSavingEntity update(BankEntity bankInfo){
+        this.bankInfo = bankInfo;
+        return this;
     }
 }

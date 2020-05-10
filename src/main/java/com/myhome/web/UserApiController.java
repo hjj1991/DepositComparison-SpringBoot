@@ -85,7 +85,7 @@ public class UserApiController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "회원 단건 조회", notes = "userId로 회원을 조회한다")
-    @RequestMapping(value = "/user", method = RequestMethod.GET)
+    @GetMapping("/user")
     public SingleResponseDto<UserDetailResponseDto> findUserById(@RequestHeader("X_AUTH_TOKEN") String authToken) {
         return responseService.getSingleResponse(userService.getUserDetail(userRepository
                 .findByUserId(jwtTokenProvider.getUserPk(authToken)).orElseThrow(CUserNotFoundException::new)));

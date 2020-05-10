@@ -1,15 +1,17 @@
 package com.myhome.domain.invest;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.*;
 
 import javax.persistence.*;
 
 @NoArgsConstructor
 @Getter
+@ToString
 @Table(name = "tbl_installment_saving_option")
 @Entity
+@Setter
 public class InstallmentSavingOptionEntity {
 
     @Id
