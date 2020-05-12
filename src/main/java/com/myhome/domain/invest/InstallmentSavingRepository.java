@@ -11,7 +11,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 public interface InstallmentSavingRepository extends JpaRepository<InstallmentSavingEntity, Long> {
-    @Query("select DISTINCT a from InstallmentSavingEntity as a join fetch a.options")
+    @Query("select DISTINCT a from InstallmentSavingEntity as a join fetch a.options join fetch a.bankInfo")
     List<InstallmentSavingEntity> findAllJoinFetch();
 
     InstallmentSavingEntity findTopByFinPrdtCd(String finPrdtCd);

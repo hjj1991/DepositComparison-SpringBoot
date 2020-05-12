@@ -66,16 +66,6 @@ public class InvestRepositoryTest {
     public void 매니투원Test() throws Exception {
 
         InstallmentSavingOptionEntity installmentSavingOptionEntity = new InstallmentSavingOptionEntity();
-        installmentSavingOptionEntity.setDclsMonth("1111");
-        installmentSavingOptionEntity.setFinCoNo("1111");
-        installmentSavingOptionEntity.setFinPrdtCd("2222");
-        installmentSavingOptionEntity.setIntrRate(Double.valueOf("22"));
-        installmentSavingOptionEntity.setIntrRate2(4.0);
-        installmentSavingOptionEntity.setIntrRateType("2222");
-        installmentSavingOptionEntity.setIntrRateTypeNm("5555");
-        installmentSavingOptionEntity.setRsrvType("555");
-        installmentSavingOptionEntity.setRsrvTypeNm("222");
-        installmentSavingOptionEntity.setSaveTrm("5555");
 
         List<InstallmentSavingOptionEntity> installmentSavingOptionEntityList = new ArrayList<>();
         InstallmentSavingEntity installmentSavingEntity = InstallmentSavingEntity.builder()

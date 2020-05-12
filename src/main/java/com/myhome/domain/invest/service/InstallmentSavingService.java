@@ -48,11 +48,6 @@ public class InstallmentSavingService {
         });
     }
 
-//    @Transactional(readOnly = true)
-//    public Page<InstallmentSavingEntity> findInstallmentSaving(PageRequest pageRequest) {
-//        Pageable pageRequest1 = org.springframework.data.domain.PageRequest.of(pageRequest.getPageNumber(),  pageRequest.getPageSize());
-//        return installmentSavingRepository.findAll(pageRequest1);
-//    }
     public List<InstallmentResponseDto> findInstallmentSaving() {
         ModelMapper modelMapper = new ModelMapper();
 //        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
@@ -61,7 +56,6 @@ public class InstallmentSavingService {
             @Override
             public InstallmentResponseDto apply(InstallmentSavingEntity installmentSavingEntity) {
                 InstallmentResponseDto installmentResponseDto = modelMapper.map(installmentSavingEntity, InstallmentResponseDto.class);
-                System.out.println(installmentSavingEntity.getBankInfo().getBankRole());
                 installmentResponseDto.setBankInfo(modelMapper.map(installmentSavingEntity.getBankInfo(), InstallmentResponseDto.BankInfo.class));
                 installmentResponseDto.setOptionList(installmentSavingEntity.getOptions().stream().map(new Function<InstallmentSavingOptionEntity, InstallmentResponseDto.Options>() {
                     @Override
@@ -117,24 +111,12 @@ public class InstallmentSavingService {
                         }
                     }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd)).collect(Collectors.toList());
                     List<InstallmentSavingOptionEntity> resultList = new ArrayList<>();
-//                    for(InstallmentSavingOptionEntity installmentSavingOptionEntity: installmentSavingOptionEntityList){
-//                        if(installmentSavingOptionEntity.getFinPrdtCd().equals(finPrdtCd)){
-//                            resultList.add(installmentSavingOptionEntity);
-//                        }
-//                    }
                     BankEntity bankEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
                     if(bankEntity == null){
 
                     }else {
                         tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), installmentSavingOptionEntityList);
                     }
-//                    System.out.println(tempEntity.toString());
-//                    System.out.println("호이호이호이");
-//                    System.out.println(installmentSavingOptionEntityList.size());
-                    for(InstallmentSavingOptionEntity installmentSavingOptionEntity: installmentSavingOptionEntityList){
-//                        System.out.println(installmentSavingOptionEntity.toString());
-                    }
-//                    installmentSavingRepository.save(tempEntity);
                     return tempEntity;
                 }
             }).collect(Collectors.toList());
