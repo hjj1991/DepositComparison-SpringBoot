@@ -1,6 +1,7 @@
 package com.myhome.domain.invest.service;
 
 import com.myhome.domain.invest.*;
+import com.myhome.domain.invest.dto.InstallmentResponseDto;
 import com.myhome.domain.invest.dto.InstallmentSavingDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -8,10 +9,6 @@ import org.modelmapper.config.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +53,28 @@ public class InstallmentSavingService {
 //        Pageable pageRequest1 = org.springframework.data.domain.PageRequest.of(pageRequest.getPageNumber(),  pageRequest.getPageSize());
 //        return installmentSavingRepository.findAll(pageRequest1);
 //    }
-
+    public List<InstallmentResponseDto> findInstallmentSaving() {
+        ModelMapper modelMapper = new ModelMapper();
+//        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        List<InstallmentSavingEntity> installmentSavingEntityList = installmentSavingRepository.findAllJoinFetch();
+        List<InstallmentResponseDto> installmentResponseDtoList = installmentSavingEntityList.stream().map(new Function<InstallmentSavingEntity, InstallmentResponseDto>() {
+            @Override
+            public InstallmentResponseDto apply(InstallmentSavingEntity installmentSavingEntity) {
+                InstallmentResponseDto installmentResponseDto = modelMapper.map(installmentSavingEntity, InstallmentResponseDto.class);
+                System.out.println(installmentSavingEntity.getBankInfo().getBankRole());
+                installmentResponseDto.setBankInfo(modelMapper.map(installmentSavingEntity.getBankInfo(), InstallmentResponseDto.BankInfo.class));
+                installmentResponseDto.setOptionList(installmentSavingEntity.getOptions().stream().map(new Function<InstallmentSavingOptionEntity, InstallmentResponseDto.Options>() {
+                    @Override
+                    public InstallmentResponseDto.Options apply(InstallmentSavingOptionEntity installmentSavingOptionEntity){
+                        InstallmentResponseDto.Options options = modelMapper.map(installmentSavingOptionEntity, InstallmentResponseDto.Options.class);
+                        return options;
+                    }
+                }).collect(Collectors.toList()));
+                return installmentResponseDto;
+            }
+        }).collect(Collectors.toList());
+        return installmentResponseDtoList;
+    }
 
     @Transactional
     public void getInstallmentSavingList(String topFinGrpNo) {
@@ -104,19 +122,24 @@ public class InstallmentSavingService {
 //                            resultList.add(installmentSavingOptionEntity);
 //                        }
 //                    }
-                    tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), installmentSavingOptionEntityList);
+                    BankEntity bankEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
+                    if(bankEntity == null){
+
+                    }else {
+                        tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), installmentSavingOptionEntityList);
+                    }
 //                    System.out.println(tempEntity.toString());
 //                    System.out.println("호이호이호이");
 //                    System.out.println(installmentSavingOptionEntityList.size());
                     for(InstallmentSavingOptionEntity installmentSavingOptionEntity: installmentSavingOptionEntityList){
 //                        System.out.println(installmentSavingOptionEntity.toString());
                     }
-                    installmentSavingRepository.save(tempEntity);
+//                    installmentSavingRepository.save(tempEntity);
                     return tempEntity;
                 }
             }).collect(Collectors.toList());
 
-//            installmentSavingRepository.saveAll(installmentSavingEntityList);
+            installmentSavingRepository.saveAll(installmentSavingEntityList);
 
             if(pageNo < Integer.valueOf(installmentSavingDto.getResult().getMaxPageNo())){
                 pageNo++;

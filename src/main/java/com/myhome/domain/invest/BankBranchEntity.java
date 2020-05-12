@@ -1,7 +1,5 @@
 package com.myhome.domain.invest;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,7 +10,7 @@ import javax.persistence.*;
 @Entity
 @Setter
 @ToString
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
+
 public class BankBranchEntity {
 
     @Id

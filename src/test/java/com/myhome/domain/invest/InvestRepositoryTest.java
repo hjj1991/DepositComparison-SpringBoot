@@ -4,15 +4,12 @@ import com.myhome.domain.invest.service.BankService;
 import com.myhome.domain.invest.service.InstallmentSavingService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.sound.midi.SysexMessage;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +60,42 @@ public class InvestRepositoryTest {
         List<BankEntity> bankEntityList = bankRepository.findAll();
 
         System.out.println(bankEntityList.get(0).getFinCoNo());
+    }
+
+    @Test
+    public void 매니투원Test() throws Exception {
+
+        InstallmentSavingOptionEntity installmentSavingOptionEntity = new InstallmentSavingOptionEntity();
+        installmentSavingOptionEntity.setDclsMonth("1111");
+        installmentSavingOptionEntity.setFinCoNo("1111");
+        installmentSavingOptionEntity.setFinPrdtCd("2222");
+        installmentSavingOptionEntity.setIntrRate(Double.valueOf("22"));
+        installmentSavingOptionEntity.setIntrRate2(4.0);
+        installmentSavingOptionEntity.setIntrRateType("2222");
+        installmentSavingOptionEntity.setIntrRateTypeNm("5555");
+        installmentSavingOptionEntity.setRsrvType("555");
+        installmentSavingOptionEntity.setRsrvTypeNm("222");
+        installmentSavingOptionEntity.setSaveTrm("5555");
+
+        List<InstallmentSavingOptionEntity> installmentSavingOptionEntityList = new ArrayList<>();
+        InstallmentSavingEntity installmentSavingEntity = InstallmentSavingEntity.builder()
+                .dclsMonth("11")
+                .etcNote("22200")
+                .finCoNo("333")
+                .finCoSubmDay("333")
+                .finPrdtCd("444")
+                .finPrdtNm("55")
+                .joinDeny("33")
+                .joinMember("44")
+                .joinWay("33")
+                .korCoNm("55")
+                .maxLimit(Long.valueOf("55"))
+                .mtrtInt("44")
+                .spclCnd("555")
+                .options(installmentSavingOptionEntityList)
+                .build();
+
+        installmentSavingRepository.save(installmentSavingEntity);
     }
 
     @Test

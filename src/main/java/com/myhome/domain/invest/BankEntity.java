@@ -1,9 +1,8 @@
 package com.myhome.domain.invest;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.List;
 @Getter
 @Table(name = "tbl_bank")
 @Entity
-@Setter
 public class BankEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +39,6 @@ public class BankEntity {
     private List<BankBranchEntity> bankBranchList = new ArrayList<>();
 
 
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bankInfo")
     private List<InstallmentSavingEntity> installmentSavingEntityList = new ArrayList<>();
 

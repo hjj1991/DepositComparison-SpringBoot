@@ -1,18 +1,16 @@
 package com.myhome.domain.invest;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class)
+
 @Table(name = "tbl_installment_saving")
 @Entity
 @ToString
@@ -54,7 +52,7 @@ public class InstallmentSavingEntity {
     @JoinColumn(name="installmentSavingEntity_id")
     private List<InstallmentSavingOptionEntity> options;
 
-    @ManyToOne(cascade = CascadeType.ALL,  optional = false, fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name="bankEntity_id", nullable = true)
     private BankEntity bankInfo;
 
