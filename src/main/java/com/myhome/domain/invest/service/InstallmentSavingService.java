@@ -100,6 +100,7 @@ public class InstallmentSavingService {
                     InstallmentSavingEntity tempEntity = new InstallmentSavingEntity();
                     tempEntity = modelMapper.map(baselist, InstallmentSavingEntity.class);
                     String finPrdtCd = tempEntity.getFinPrdtCd();
+                    String finCoNm = tempEntity.getFinCoNo();
                     List<InstallmentSavingOptionEntity> installmentSavingOptionEntityList = installmentSavingDto.getResult().getOptionList().stream().map(new Function<InstallmentSavingDto.Optionlist, InstallmentSavingOptionEntity>() {
                         @Override
                         public InstallmentSavingOptionEntity apply(InstallmentSavingDto.Optionlist optionlist){
@@ -109,7 +110,7 @@ public class InstallmentSavingService {
 
                             return tempEntity2;
                         }
-                    }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd)).collect(Collectors.toList());
+                    }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd) && t.getFinCoNo().equals(finCoNm)).collect(Collectors.toList());
                     List<InstallmentSavingOptionEntity> resultList = new ArrayList<>();
                     BankEntity bankEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
                     if(bankEntity == null){
