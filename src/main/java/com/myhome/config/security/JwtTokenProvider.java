@@ -57,7 +57,7 @@ public class JwtTokenProvider { // JWT 토큰을 생성 및 검증 모듈
                 .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret값 세팅
                 .compact();
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         result.add(token);
         result.add(String.valueOf(expireTime));
@@ -90,7 +90,8 @@ public class JwtTokenProvider { // JWT 토큰을 생성 및 검증 모듈
 
             cal.setTime(new Date());
             cal.add(Calendar.DATE, -2);
-            if(df.format(currentExpiredDate).compareTo(df.format(cal.getTime())) > 0) {
+            System.out.println(df.format(currentExpiredDate).compareTo(df.format(cal.getTime())));
+            if(df.format(currentExpiredDate).compareTo(df.format(cal.getTime())) < 0) {
                 updateTokenEntity.update(refreshToken, LocalDateTime.ofInstant(expiredDate.toInstant(), ZoneId.systemDefault()));
             }else {
                 refreshToken = updateTokenEntity.getRefreshToken();
