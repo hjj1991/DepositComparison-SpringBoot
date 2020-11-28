@@ -1,6 +1,7 @@
 buildscript {
     ext {
         springBootVersion = '2.1.9.RELEASE'
+//        springBootVersion = '2.3.2.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -41,10 +42,13 @@ repositories {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+//    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+//    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -54,7 +58,7 @@ dependencies {
     implementation 'io.springfox:springfox-swagger2:2.6.1'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'io.springfox:springfox-swagger-ui:2.6.1'
-    implementation 'org.springframework.boot:spring-boot-devtools'
+//    implementation 'org.springframework.boot:spring-boot-devtools'
     // https://mvnrepository.com/artifact/com.github.gavlyukovskiy/p6spy-spring-boot-starter
 //    compile group: 'com.github.gavlyukovskiy', name: 'p6spy-spring-boot-starter', version: '1.6.1'
 
