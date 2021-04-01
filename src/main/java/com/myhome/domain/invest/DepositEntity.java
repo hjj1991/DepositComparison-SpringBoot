@@ -12,11 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 
-@Table(name = "tbl_installment_saving")
+@Table(name = "tbl_deposit")
 @Entity
 @ToString
-public class InstallmentSavingEntity {
-
+public class DepositEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -60,20 +59,20 @@ public class InstallmentSavingEntity {
     private int deleteFlag;
 
 
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name="installmentSavingEntity_id")
-    private List<InstallmentSavingOptionEntity> options;
+    @JoinColumn(name="depositEntity_id")
+    private List<DepositOptionEntity> options;
 
     @ManyToOne
     @JoinColumn(name="bankEntity_id", nullable = true)
     private BankEntity bankInfo;
 
     @Builder
-    private InstallmentSavingEntity(long maxLimit, String spclCnd, String mtrtInt,
+    private DepositEntity(long maxLimit, String spclCnd, String mtrtInt,
                                     String joinMember, String joinWay, String joinDeny,
                                     String korCoNm, String finCoNo, String finPrdtCd,
-                                    String finPrdtNm, String etcNote, String dclsMonth,
-                                    String finCoSubmDay, List<InstallmentSavingOptionEntity> options, BankEntity bankInfo) {
+                                    String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay, List<DepositOptionEntity> options, BankEntity bankInfo) {
         this.maxLimit = maxLimit;
         this.spclCnd = spclCnd;
         this.mtrtInt = mtrtInt;
@@ -93,11 +92,10 @@ public class InstallmentSavingEntity {
         this.deleteFlag = 0;
     }
 
-    public InstallmentSavingEntity update(long maxLimit, String spclCnd, String mtrtInt,
-                                          String joinMember, String joinWay, String joinDeny,
-                                          String korCoNm, String finCoNo,
-                                          String finPrdtNm, String etcNote, String dclsMonth,
-                                          String finCoSubmDay) {
+    public DepositEntity update(long maxLimit, String spclCnd, String mtrtInt,
+                                String joinMember, String joinWay, String joinDeny,
+                                String korCoNm, String finCoNo,
+                                String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay) {
         this.maxLimit = maxLimit;
         this.spclCnd = spclCnd;
         this.mtrtInt = mtrtInt;
@@ -112,16 +110,15 @@ public class InstallmentSavingEntity {
         this.finCoSubmDay = finCoSubmDay;
         this.updateDateTime = LocalDateTime.now();
         this.deleteFlag = 0;
-
         return this;
     }
 
-    public InstallmentSavingEntity update(BankEntity bankInfo, List<InstallmentSavingOptionEntity> options){
+    public DepositEntity update(BankEntity bankInfo, List<DepositOptionEntity> options){
         this.bankInfo = bankInfo;
         this.options = options;
         return this;
     }
-    public InstallmentSavingEntity update(BankEntity bankInfo){
+    public DepositEntity update(BankEntity bankInfo){
         this.bankInfo = bankInfo;
         return this;
     }

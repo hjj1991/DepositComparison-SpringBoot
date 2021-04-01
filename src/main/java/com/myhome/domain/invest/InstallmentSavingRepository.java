@@ -14,6 +14,12 @@ public interface InstallmentSavingRepository extends JpaRepository<InstallmentSa
     @Query("select DISTINCT a from InstallmentSavingEntity as a join fetch a.options join fetch a.bankInfo")
     List<InstallmentSavingEntity> findAllJoinFetch();
 
-    InstallmentSavingEntity findTopByFinPrdtCd(String finPrdtCd);
+    InstallmentSavingEntity findTopByFinPrdtCdAndFinCoNo(String finPrdtCd, String finCoNo);
+
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE InstallmentSavingEntity as a SET a.deleteFlag = :flag")
+    void updateTableInstallmentSavingFlag(@Param("flag") int flag);
 
 }

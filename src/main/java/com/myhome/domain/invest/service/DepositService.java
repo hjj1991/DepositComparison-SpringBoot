@@ -1,6 +1,8 @@
 package com.myhome.domain.invest.service;
 
 import com.myhome.domain.invest.*;
+import com.myhome.domain.invest.dto.DepositDto;
+import com.myhome.domain.invest.dto.DepositResponseDto;
 import com.myhome.domain.invest.dto.InstallmentResponseDto;
 import com.myhome.domain.invest.dto.InstallmentSavingDto;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +28,13 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class InstallmentSavingService {
+public class DepositService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final InstallmentSavingRepository installmentSavingRepository;
-    private final InstallmentSavingOptionRepository installmentSavingOptionRepository;
     @Autowired
     private BankRepository bankRepository;
+
+    private final DepositRepository depositRepository;
 
     private WebClient webClient = WebClient.builder()
 //            .baseUrl("https://kauth.kakao.com/")
@@ -48,30 +50,32 @@ public class InstallmentSavingService {
         });
     }
 
-    public List<InstallmentResponseDto> findInstallmentSaving() {
+    public List<DepositResponseDto> findDeposit() {
         ModelMapper modelMapper = new ModelMapper();
 //        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        List<InstallmentSavingEntity> installmentSavingEntityList = installmentSavingRepository.findAllJoinFetch();
-        List<InstallmentResponseDto> installmentResponseDtoList = installmentSavingEntityList.stream().map(new Function<InstallmentSavingEntity, InstallmentResponseDto>() {
+        List<DepositEntity> depositEntityList = depositRepository.findAllJoinFetch();
+        List<DepositResponseDto> depositResponseDtoList = depositEntityList.stream().map(new Function<DepositEntity, DepositResponseDto>() {
             @Override
-            public InstallmentResponseDto apply(InstallmentSavingEntity installmentSavingEntity) {
-                InstallmentResponseDto installmentResponseDto = modelMapper.map(installmentSavingEntity, InstallmentResponseDto.class);
-                installmentResponseDto.setBankInfo(modelMapper.map(installmentSavingEntity.getBankInfo(), InstallmentResponseDto.BankInfo.class));
-                installmentResponseDto.setOptionList(installmentSavingEntity.getOptions().stream().map(new Function<InstallmentSavingOptionEntity, InstallmentResponseDto.Options>() {
+            public DepositResponseDto apply(DepositEntity depositEntity) {
+                DepositResponseDto depositResponseDto = modelMapper.map(depositEntity, DepositResponseDto.class);
+                depositResponseDto.setBankInfo(modelMapper.map(depositEntity.getBankInfo(), DepositResponseDto.BankInfo.class));
+                depositResponseDto.setOptionList(depositEntity.getOptions().stream().map(new Function<DepositOptionEntity, DepositResponseDto.Options>() {
                     @Override
-                    public InstallmentResponseDto.Options apply(InstallmentSavingOptionEntity installmentSavingOptionEntity){
-                        InstallmentResponseDto.Options options = modelMapper.map(installmentSavingOptionEntity, InstallmentResponseDto.Options.class);
+                    public DepositResponseDto.Options apply(DepositOptionEntity depositOptionEntity){
+                        DepositResponseDto.Options options = modelMapper.map(depositOptionEntity, DepositResponseDto.Options.class);
                         return options;
                     }
                 }).collect(Collectors.toList()));
-                return installmentResponseDto;
+                return depositResponseDto;
             }
         }).collect(Collectors.toList());
-        return installmentResponseDtoList;
+        return depositResponseDtoList;
     }
 
+
+
     @Transactional
-    public void getInstallmentSavingList(String topFinGrpNo) {
+    public void getDepositList(String topFinGrpNo) {
         int pageNo = 1;
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration()
@@ -85,21 +89,20 @@ public class InstallmentSavingService {
             ClientResponse response = webClient.get()
                     .uri((uriBuilder) -> uriBuilder.scheme("http")
                             .host("finlife.fss.or.kr")
-                            .path("finlifeapi/savingProductsSearch.json")
+                            .path("finlifeapi/depositProductsSearch.json")
                             .queryParams(params)
                             .build())
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .block();
 
-            InstallmentSavingDto installmentSavingDto = response.bodyToMono(InstallmentSavingDto.class).block();
-            List<InstallmentSavingEntity> installmentSavingEntityList = installmentSavingDto.getResult().getBaseList().stream().map(new Function<InstallmentSavingDto.Baselist, InstallmentSavingEntity>() {
+            DepositDto depositDto = response.bodyToMono(DepositDto.class).block();
+            List<DepositEntity> depositEntityList = depositDto.getResult().getBaseList().stream().map(new Function<DepositDto.Baselist, DepositEntity>() {
                 @Override
-                public InstallmentSavingEntity apply(InstallmentSavingDto.Baselist baselist) {
-                    InstallmentSavingEntity tempEntity = installmentSavingRepository.findTopByFinPrdtCdAndFinCoNo(baselist.getFinPrdtCd(), baselist.getFinCoNo());
-//                    tempEntity = installmentSavingRepository.findTopByFinPrdtCdAndFinCoNo(baselist.getFinPrdtCd(),);
-                    if(tempEntity == null){
-                        tempEntity = modelMapper.map(baselist, InstallmentSavingEntity.class);
+                public DepositEntity apply(DepositDto.Baselist baselist) {
+                    DepositEntity tempEntity = depositRepository.findTopByFinPrdtCdAndFinCoNo(baselist.getFinPrdtCd(), baselist.getFinCoNo());
+                    if(tempEntity == null) {
+                        tempEntity = modelMapper.map(baselist, DepositEntity.class);
                     }else{
                         tempEntity = tempEntity.update(baselist.getMaxLimit(), baselist.getSpclCnd(), baselist.getMtrtInt(), baselist.getJoinMember(), baselist.getJoinWay(),
                                 baselist.getJoinDeny(), baselist.getKorCoNm(), baselist.getFinCoNo(), baselist.getFinPrdtNm(), baselist.getEtcNote(), baselist.getDclsMonth(),
@@ -107,30 +110,30 @@ public class InstallmentSavingService {
                     }
                     String finPrdtCd = tempEntity.getFinPrdtCd();
                     String finCoNm = tempEntity.getFinCoNo();
-                    List<InstallmentSavingOptionEntity> installmentSavingOptionEntityList = installmentSavingDto.getResult().getOptionList().stream().map(new Function<InstallmentSavingDto.Optionlist, InstallmentSavingOptionEntity>() {
+                    List<DepositOptionEntity> depositOptionEntityList = depositDto.getResult().getOptionList().stream().map(new Function<DepositDto.Optionlist, DepositOptionEntity>() {
                         @Override
-                        public InstallmentSavingOptionEntity apply(InstallmentSavingDto.Optionlist optionlist){
-                            InstallmentSavingOptionEntity tempEntity2 = new InstallmentSavingOptionEntity();
-                            tempEntity2 = modelMapper.map(optionlist, InstallmentSavingOptionEntity.class);
+                        public DepositOptionEntity apply(DepositDto.Optionlist optionlist){
+                            DepositOptionEntity tempEntity2 = new DepositOptionEntity();
+                            tempEntity2 = modelMapper.map(optionlist, DepositOptionEntity.class);
 
 
                             return tempEntity2;
                         }
                     }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd) && t.getFinCoNo().equals(finCoNm)).collect(Collectors.toList());
-                    List<InstallmentSavingOptionEntity> resultList = new ArrayList<>();
+                    List<DepositOptionEntity> resultList = new ArrayList<>();
                     BankEntity bankEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
                     if(bankEntity == null){
 
                     }else {
-                        tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), installmentSavingOptionEntityList);
+                        tempEntity.update(bankRepository.findFirstByFinCoNo(baselist.getFinCoNo()), depositOptionEntityList);
                     }
                     return tempEntity;
                 }
             }).collect(Collectors.toList());
 
-            installmentSavingRepository.saveAll(installmentSavingEntityList);
+            depositRepository.saveAll(depositEntityList);
 
-            if(pageNo < Integer.valueOf(installmentSavingDto.getResult().getMaxPageNo())){
+            if(pageNo < Integer.valueOf(depositDto.getResult().getMaxPageNo())){
                 pageNo++;
             }else{
                 break;
@@ -138,7 +141,4 @@ public class InstallmentSavingService {
         }
 
     }
-
-
-
 }

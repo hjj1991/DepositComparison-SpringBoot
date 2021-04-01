@@ -89,6 +89,18 @@ public class InvestRepositoryTest {
     }
 
     @Test
+    public void 업데이트() throws Exception{
+        installmentSavingRepository.updateTableInstallmentSavingFlag(9);
+    }
+
+    @Test
+    public void 조회() throws Exception{
+        InstallmentSavingEntity temp = installmentSavingRepository.findTopByFinPrdtCd("WR0001A");
+        System.out.println(temp);
+
+    }
+
+    @Test
     public void 은행검색() throws Exception{
         log.info("*****은행 정보 동기화 시작 ******");
         installmentSavingOptionRepository.truncateTableInstallmentSavingOption();

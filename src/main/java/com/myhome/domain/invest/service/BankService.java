@@ -90,9 +90,14 @@ public class BankService {
                     }else {
                         bankRole = "없음";
                     }
-                    BankEntity tempEntity = new BankEntity();
-                    tempEntity = modelMapper.map(baselist, BankEntity.class);
+                    BankEntity tempEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
+                    if(tempEntity == null) {
+                        tempEntity = modelMapper.map(baselist, BankEntity.class);
+                    }else {
+                        tempEntity = tempEntity.update(baselist.getCalTel(), baselist.getHompUrl(), baselist.getDclsChrgMan(), baselist.getKorCoNm(), baselist.getDclsMonth(), bankRole);
+                    }
                     String finCoNo = tempEntity.getFinCoNo();
+
                     List<BankBranchEntity> resultList = new ArrayList<>();
                     List<BankBranchEntity> bankBranchEntityList = bankDto.getResult().getOptionList().stream().map(new Function<BankDto.Optionlist, BankBranchEntity>() {
                         @Override

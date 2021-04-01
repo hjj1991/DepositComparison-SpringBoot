@@ -2,6 +2,7 @@ package com.myhome.config;
 
 import com.myhome.domain.invest.*;
 import com.myhome.domain.invest.service.BankService;
+import com.myhome.domain.invest.service.DepositService;
 import com.myhome.domain.invest.service.InstallmentSavingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,10 @@ public class InstallmentSavingSyncConfig {
     @Autowired
     private InstallmentSavingOptionRepository installmentSavingOptionRepository;
     @Autowired
+    private DepositRepository depositRepository;
+    @Autowired
+    private DepositOptionRepository depositOptionRepository;
+    @Autowired
     private BankRepository bankRepository;
     @Autowired
     private BankBranchRepository bankBranchRepository;
@@ -44,10 +49,12 @@ public class InstallmentSavingSyncConfig {
     @Autowired
     private InstallmentSavingService installmentSavingService;
     @Autowired
+    private DepositService depositService;
+    @Autowired
     private SimpleJobLauncher jobLauncher;
 
-        @Scheduled(cron = "0 0 20 * * *" )
-//    @Scheduled(fixedDelay=1000 * 100000)
+//        @Scheduled(cron = "0 0 20 * * *" )
+    @Scheduled(fixedDelay=1000 * 100000)
     @Transactional
     public void perform() throws Exception {
         System.out.println("Job Started at : " + new Date());
@@ -75,15 +82,23 @@ public class InstallmentSavingSyncConfig {
         .tasklet((contribution, chunkContext) -> {
             log.info("*****은행 정보 동기화 시작 ******");
             installmentSavingOptionRepository.truncateTableInstallmentSavingOption();
-            installmentSavingRepository.deleteAllInBatch();
+            depositOptionRepository.truncateTableDepositOption();
+//            installmentSavingRepository.deleteAllInBatch();
+//            depositRepository.deleteAllInBatch();
             bankBranchRepository.truncateTableBankBranch();
-            bankRepository.deleteAllInBatch();
+//            bankRepository.deleteAllInBatch();
+            bankRepository.updateTableBankFlag(9);
+            depositRepository.updateTableDepositFlag(9);
+            installmentSavingRepository.updateTableInstallmentSavingFlag(9);
             bankService.getBankList("020000"); //은행
             bankService.getBankList("030300"); //저축은행
             log.info("*****은행 정보 동기화 종료 ******");
             installmentSavingService.getInstallmentSavingList("020000"); //은행
             installmentSavingService.getInstallmentSavingList("030300"); //저축은행
             log.info("*****적금 정보 동기화 종료 ******");
+            depositService.getDepositList("020000"); //은행
+            depositService.getDepositList("030300"); //저축은행
+            log.info("*****예금 정보 동기화 종료 ******");
             return RepeatStatus.FINISHED;
         }).build();
     }
