@@ -14,6 +14,9 @@ public interface InstallmentSavingRepository extends JpaRepository<InstallmentSa
     @Query("select DISTINCT a from InstallmentSavingEntity as a join fetch a.options join fetch a.bankInfo")
     List<InstallmentSavingEntity> findAllJoinFetch();
 
+    @Query("SELECT a FROM InstallmentSavingEntity as a join fetch a.options b join fetch a.bankInfo GROUP BY a.finCoNo, a.finPrdtCd ORDER BY b.intrRate DESC")
+    List<InstallmentSavingEntity> findOrderByInstallment();
+
     InstallmentSavingEntity findTopByFinPrdtCdAndFinCoNo(String finPrdtCd, String finCoNo);
 
 

@@ -11,10 +11,8 @@ import java.util.List;
 
 @NoArgsConstructor
 @Getter
-
 @Table(name = "tbl_deposit")
 @Entity
-@ToString
 public class DepositEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,6 +62,9 @@ public class DepositEntity {
     @JoinColumn(name="depositEntity_id")
     private List<DepositOptionEntity> options;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "depositEntity")
+    private List<DepositCommentEntity> comments;
+
     @ManyToOne
     @JoinColumn(name="bankEntity_id", nullable = true)
     private BankEntity bankInfo;
@@ -72,7 +73,8 @@ public class DepositEntity {
     private DepositEntity(long maxLimit, String spclCnd, String mtrtInt,
                                     String joinMember, String joinWay, String joinDeny,
                                     String korCoNm, String finCoNo, String finPrdtCd,
-                                    String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay, List<DepositOptionEntity> options, BankEntity bankInfo) {
+                                    String finPrdtNm, String etcNote, String dclsMonth, String finCoSubmDay,
+                          List<DepositOptionEntity> options,  BankEntity bankInfo) {
         this.maxLimit = maxLimit;
         this.spclCnd = spclCnd;
         this.mtrtInt = mtrtInt;

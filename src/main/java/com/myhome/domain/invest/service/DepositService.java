@@ -1,10 +1,10 @@
 package com.myhome.domain.invest.service;
 
+import com.myhome.common.exception.CUserNotFoundException;
+import com.myhome.config.security.JwtTokenProvider;
 import com.myhome.domain.invest.*;
-import com.myhome.domain.invest.dto.DepositDto;
-import com.myhome.domain.invest.dto.DepositResponseDto;
-import com.myhome.domain.invest.dto.InstallmentResponseDto;
-import com.myhome.domain.invest.dto.InstallmentSavingDto;
+import com.myhome.domain.invest.dto.*;
+import com.myhome.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.config.Configuration;
@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,7 +35,10 @@ public class DepositService {
     @Autowired
     private BankRepository bankRepository;
 
+    private final DepositCommentRepository depositCommentRepository;
     private final DepositRepository depositRepository;
+    private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     private WebClient webClient = WebClient.builder()
 //            .baseUrl("https://kauth.kakao.com/")
@@ -50,26 +54,114 @@ public class DepositService {
         });
     }
 
-    public List<DepositResponseDto> findDeposit() {
+    public List<DepositResponseDto> findDeposit(String size) {
         ModelMapper modelMapper = new ModelMapper();
 //        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        List<DepositEntity> depositEntityList = depositRepository.findAllJoinFetch();
-        List<DepositResponseDto> depositResponseDtoList = depositEntityList.stream().map(new Function<DepositEntity, DepositResponseDto>() {
+        if(size.equals("")) {
+            List<DepositEntity> depositEntityList = depositRepository.findAllJoinFetch();
+            List<DepositResponseDto> depositResponseDtoList = depositEntityList.stream().map(new Function<DepositEntity, DepositResponseDto>() {
+                @Override
+                public DepositResponseDto apply(DepositEntity depositEntity) {
+                    DepositResponseDto depositResponseDto = modelMapper.map(depositEntity, DepositResponseDto.class);
+                    depositResponseDto.setBankInfo(modelMapper.map(depositEntity.getBankInfo(), DepositResponseDto.BankInfo.class));
+                    depositResponseDto.setOptionList(depositEntity.getOptions().stream().map(new Function<DepositOptionEntity, DepositResponseDto.Options>() {
+                        @Override
+                        public DepositResponseDto.Options apply(DepositOptionEntity depositOptionEntity) {
+                            DepositResponseDto.Options options = modelMapper.map(depositOptionEntity, DepositResponseDto.Options.class);
+                            return options;
+                        }
+                    }).collect(Collectors.toList()));
+                    return depositResponseDto;
+                }
+            }).collect(Collectors.toList());
+            return depositResponseDtoList;
+        }else{
+            List<DepositEntity> depositEntityList = depositRepository.findOrderByDeposit();
+            List<DepositResponseDto> depositResponseDtoList = depositEntityList.stream().limit(Long.parseLong(size)).map(new Function<DepositEntity, DepositResponseDto>() {
+                @Override
+                public DepositResponseDto apply(DepositEntity depositEntity) {
+                    DepositResponseDto depositResponseDto = modelMapper.map(depositEntity, DepositResponseDto.class);
+                    depositResponseDto.setBankInfo(modelMapper.map(depositEntity.getBankInfo(), DepositResponseDto.BankInfo.class));
+                    depositResponseDto.setOptionList(depositEntity.getOptions().stream().map(new Function<DepositOptionEntity, DepositResponseDto.Options>() {
+                        @Override
+                        public DepositResponseDto.Options apply(DepositOptionEntity depositOptionEntity) {
+                            DepositResponseDto.Options options = modelMapper.map(depositOptionEntity, DepositResponseDto.Options.class);
+                            return options;
+                        }
+                    }).collect(Collectors.toList()));
+                    return depositResponseDto;
+                }
+            }).collect(Collectors.toList());
+            return depositResponseDtoList;
+        }
+    }
+
+    public List<DepositCommentResponseDto> findDepositComments(Long depositEntityId) {
+        ModelMapper modelMapper = new ModelMapper();
+        List<DepositCommentEntity> depositCommentEntityList = depositCommentRepository.findCommentsOfDeposit(depositEntityId);
+        List<DepositCommentResponseDto> depositCommentResponseDtoList = depositCommentEntityList.stream().map(new Function<DepositCommentEntity, DepositCommentResponseDto>() {
             @Override
-            public DepositResponseDto apply(DepositEntity depositEntity) {
-                DepositResponseDto depositResponseDto = modelMapper.map(depositEntity, DepositResponseDto.class);
-                depositResponseDto.setBankInfo(modelMapper.map(depositEntity.getBankInfo(), DepositResponseDto.BankInfo.class));
-                depositResponseDto.setOptionList(depositEntity.getOptions().stream().map(new Function<DepositOptionEntity, DepositResponseDto.Options>() {
-                    @Override
-                    public DepositResponseDto.Options apply(DepositOptionEntity depositOptionEntity){
-                        DepositResponseDto.Options options = modelMapper.map(depositOptionEntity, DepositResponseDto.Options.class);
-                        return options;
-                    }
-                }).collect(Collectors.toList()));
-                return depositResponseDto;
+            public DepositCommentResponseDto apply(DepositCommentEntity depositCommentEntity){
+                DepositCommentResponseDto depositCommentResponseDto = modelMapper.map(depositCommentEntity, DepositCommentResponseDto.class);
+                return depositCommentResponseDto;
             }
         }).collect(Collectors.toList());
-        return depositResponseDtoList;
+
+        return depositCommentResponseDtoList;
+
+    }
+
+    public HashMap<String, String> addDepositComment(Long depositId, String authToken, DepositCommentRequestDto depositCommentRequestDto){
+        HashMap<String, String> result = new HashMap<>();
+        String userId = userRepository.findByUserId(jwtTokenProvider.getUserPk(authToken)).orElseThrow(CUserNotFoundException::new).getUserId();
+        DepositEntity depositEntity = depositRepository.getOne(depositId);
+        DepositCommentEntity depositCommentEntity = DepositCommentEntity.builder()
+                .contents(depositCommentRequestDto.getContents())
+                .creatorId(userId)
+                .depositEntity(depositEntity)
+                .deletedYn("N")
+                .build();
+        depositCommentRepository.save(depositCommentEntity);
+        result.put("code", "0");
+        result.put("msg", "정상 작성되었습니다..");
+        result.put("success", "true");
+        return result;
+    }
+
+    public HashMap<String, String> modifyDepositComment(Long commentId, String authToken, DepositCommentRequestDto depositCommentRequestDto) {
+        HashMap<String, String> result = new HashMap<>();
+        String userId = userRepository.findByUserId(jwtTokenProvider.getUserPk(authToken)).orElseThrow(CUserNotFoundException::new).getUserId();
+        DepositCommentEntity depositCommentEntity = depositCommentRepository.getOne(commentId);
+        if(userId.equals(depositCommentEntity.getCreatorId())) {
+            depositCommentEntity.update(depositCommentRequestDto.getContents());
+            depositCommentRepository.save(depositCommentEntity);
+            result.put("code", "0");
+            result.put("msg", "정상 수정되었습니다.");
+            result.put("success", "true");
+        }else{
+            result.put("code", "0");
+            result.put("msg", "잘못된 접근입니다.");
+            result.put("success", "false");
+        }
+        return result;
+    }
+
+    public HashMap<String, String> deleteDepositComment(Long commentId, String authToken) {
+        HashMap<String, String> result = new HashMap<>();
+        String userId = userRepository.findByUserId(jwtTokenProvider.getUserPk(authToken)).orElseThrow(CUserNotFoundException::new).getUserId();
+        DepositCommentEntity depositCommentEntity = depositCommentRepository.getOne(commentId);
+        if(userId.equals(depositCommentEntity.getCreatorId())) {
+            depositCommentEntity.delete();
+            depositCommentRepository.save(depositCommentEntity);
+            result.put("code", "0");
+            result.put("msg", "정상 삭제되었습니다.");
+            result.put("success", "true");
+        }else{
+            result.put("code", "0");
+            result.put("msg", "잘못된 접근입니다.");
+            result.put("success", "false");
+        }
+        return result;
     }
 
 
@@ -120,7 +212,7 @@ public class DepositService {
                             return tempEntity2;
                         }
                     }).filter(t -> t.getFinPrdtCd().equals(finPrdtCd) && t.getFinCoNo().equals(finCoNm)).collect(Collectors.toList());
-                    List<DepositOptionEntity> resultList = new ArrayList<>();
+//                    List<DepositOptionEntity> resultList = new ArrayList<>();
                     BankEntity bankEntity = bankRepository.findFirstByFinCoNo(baselist.getFinCoNo());
                     if(bankEntity == null){
 
@@ -141,4 +233,6 @@ public class DepositService {
         }
 
     }
+
+
 }

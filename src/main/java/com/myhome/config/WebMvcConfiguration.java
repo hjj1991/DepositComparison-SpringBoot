@@ -23,7 +23,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer{
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:3000", "http://dognas.ipdisk.co.kr")
-                        .allowedMethods("GET", "POST", "OPTIONS", "PUT")
+                        .allowedMethods("GET", "POST", "OPTIONS", "PUT", "DELETE")
                         .allowCredentials(false)
                         .maxAge(3600);
             }

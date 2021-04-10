@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,10 @@ public class InvestRepositoryTest {
     InstallmentSavingService installmentSavingService;
     @Autowired
     InstallmentSavingRepository installmentSavingRepository;
+    @Autowired
+    DepositCommentRepository depositCommentRepository;
+    @Autowired
+    DepositRepository depositRepository;
     @Autowired
     BankRepository bankRepository;
     @Autowired
@@ -93,11 +98,21 @@ public class InvestRepositoryTest {
         installmentSavingRepository.updateTableInstallmentSavingFlag(9);
     }
 
+    @Transactional(readOnly = true)
     @Test
     public void 조회() throws Exception{
-        InstallmentSavingEntity temp = installmentSavingRepository.findTopByFinPrdtCd("WR0001A");
-        System.out.println(temp);
+        System.out.println(depositCommentRepository.findCommentsOfDeposit(1L).get(0).getContents());
+    }
 
+    @Test
+    public void 댓글인서트() throws Exception{
+        DepositCommentEntity depositCommentEntity = DepositCommentEntity.builder()
+                .contents("테스트")
+                .creatorId("작성자")
+                .deletedYn("N")
+                .depositEntity(depositRepository.getOne((long) 1))
+                .build();
+        depositCommentRepository.save(depositCommentEntity);
     }
 
     @Test

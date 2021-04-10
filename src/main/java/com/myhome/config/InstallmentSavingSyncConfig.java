@@ -53,8 +53,8 @@ public class InstallmentSavingSyncConfig {
     @Autowired
     private SimpleJobLauncher jobLauncher;
 
-//        @Scheduled(cron = "0 0 20 * * *" )
-    @Scheduled(fixedDelay=1000 * 100000)
+        @Scheduled(cron = "0 0 20 * * *" )
+//    @Scheduled(fixedDelay=1000 * 100000)
     @Transactional
     public void perform() throws Exception {
         System.out.println("Job Started at : " + new Date());

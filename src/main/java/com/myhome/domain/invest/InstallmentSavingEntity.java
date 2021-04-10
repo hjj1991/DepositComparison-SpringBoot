@@ -64,6 +64,9 @@ public class InstallmentSavingEntity {
     @JoinColumn(name="installmentSavingEntity_id")
     private List<InstallmentSavingOptionEntity> options;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "installmentSavingEntity")
+    private List<InstallmentSavingCommentEntity> comments;
+
     @ManyToOne
     @JoinColumn(name="bankEntity_id", nullable = true)
     private BankEntity bankInfo;
