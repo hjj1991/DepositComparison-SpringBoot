@@ -36,8 +36,7 @@ public class InstallmentSavingService {
     private final InstallmentSavingRepository installmentSavingRepository;
     private final InstallmentSavingOptionRepository installmentSavingOptionRepository;
     private final InstallmentSavingCommentRepository installmentSavingCommentRepository;
-    @Autowired
-    private BankRepository bankRepository;
+    private final BankRepository bankRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 

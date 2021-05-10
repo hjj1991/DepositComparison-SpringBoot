@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
 public class DepositService {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private BankRepository bankRepository;
+    private final BankRepository bankRepository;
 
     private final DepositCommentRepository depositCommentRepository;
     private final DepositRepository depositRepository;

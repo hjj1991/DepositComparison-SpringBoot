@@ -35,7 +35,7 @@ public class InstallmentSavingController {
     }
 
     @ApiOperation(value = "댓글목록 조회", notes = "")
-    @GetMapping(value = "/insmoney/comments/list/{installmentSavingId}")
+    @GetMapping(value = "/insmoney/comments/{installmentSavingId}")
     public MultipleResponseDto<InstallmentSavingCommentResponseDto> findComments(@PathVariable Long installmentSavingId){
         return responseService.getMultipleResponseDto(installmentSavingService.findInstallmentSavingComments(installmentSavingId));
     }
@@ -43,7 +43,7 @@ public class InstallmentSavingController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글등록", notes = "")
-    @PostMapping(value = "/insmoney/comments/add/{installmentSavingId}")
+    @PostMapping(value = "/insmoney/comments/{installmentSavingId}")
     public SingleResponseDto addComment(@PathVariable Long installmentSavingId, @RequestHeader("X_AUTH_TOKEN") String authToken, @RequestBody InstallmentSavingCommentRequestDto installmentSavingCommentRequestDto){
         HashMap<String, String> result = new HashMap<>();
         result = installmentSavingService.addInstallmentSavingComment(installmentSavingId, authToken, installmentSavingCommentRequestDto);
@@ -54,7 +54,7 @@ public class InstallmentSavingController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글수정", notes = "")
-    @PutMapping(value = "/insmoney/comments/modify/{commentId}")
+    @PatchMapping(value = "/insmoney/comments/{commentId}")
     public SingleResponseDto modifyComment(@PathVariable Long commentId, @RequestHeader("X_AUTH_TOKEN") String authToken, @RequestBody InstallmentSavingCommentRequestDto installmentSavingCommentRequestDto){
         HashMap<String, String> result = new HashMap<>();
         result = installmentSavingService.modifyInstallmentSavingComment(commentId, authToken, installmentSavingCommentRequestDto);
@@ -65,7 +65,7 @@ public class InstallmentSavingController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글삭제", notes = "")
-    @DeleteMapping(value = "/insmoney/comments/delete/{commentId}")
+    @DeleteMapping(value = "/insmoney/comments/{commentId}")
     public SingleResponseDto deleteComment(@PathVariable Long commentId, @RequestHeader("X_AUTH_TOKEN") String authToken){
         HashMap<String, String> result = new HashMap<>();
         result = installmentSavingService.deleteInstallmentSavingComment(commentId, authToken);

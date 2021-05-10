@@ -1,0 +1,70 @@
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+spring:
+  profiles:
+    active: prod
+  batch:
+    job:
+      names: ${job.name:NONE}
+  h2:
+    console:
+      enabled: true
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+  jwt:
+    secret: hjjJWT;
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 125753528708-5mm3rm5fs3kbjnb3teqj7ip8ecufu6r2.apps.googleusercontent.com
+            client-secret: 1Ajt0NLcVbrGsr-0-hwUlv6I
+            scope: profile,email
+social:
+  kakao:
+    client_id: 656c5afa5455de8f5ad9eb51e09e3720
+    redirect: http://dognas.ipdisk.co.kr/sociallogin?provider=kakao
+    url:
+      profile: https://kapi.kakao.com/v2/user/me
+      token: https://kauth.kakao.com/oauth/token
+  naver:
+    client_id: sUyp7Y2KoOfRvdsAEdCc
+    client_secret: QjKMK_CkHV
+    url:
+      profile: https://openapi.naver.com/v1/nid/me
+url:
+  base: http://dognas.ipdisk.co.kr:8080
+
+
+
+--- #개발 설정
+spring:
+  profiles: dev
+  datasource:
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/myhome?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf-8
+      password: wowjddl1
+      username: root
+
+
+--- #운영 설정
+spring:
+  profiles: prod
+  datasource:
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://dognas.ipdisk.co.kr:3306/myhome?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf-8
+      password: wowjddl1
+      username: root

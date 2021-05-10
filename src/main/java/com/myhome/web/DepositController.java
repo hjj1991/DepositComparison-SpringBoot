@@ -41,7 +41,7 @@ public class DepositController {
     }
 
     @ApiOperation(value = "댓글목록 조회", notes = "")
-    @GetMapping(value = "/depositmoney/comments/list/{depositId}")
+    @GetMapping(value = "/depositmoney/comments/{depositId}")
     public MultipleResponseDto<DepositCommentResponseDto> findComments(@PathVariable Long depositId){
         return responseService.getMultipleResponseDto(depositService.findDepositComments(depositId));
     }
@@ -49,7 +49,7 @@ public class DepositController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글등록", notes = "")
-    @PostMapping(value = "/depositmoney/comments/add/{depositId}")
+    @PostMapping(value = "/depositmoney/comments/{depositId}")
     public SingleResponseDto addComment(@PathVariable Long depositId, @RequestHeader("X_AUTH_TOKEN") String authToken, @RequestBody DepositCommentRequestDto depositCommentRequestDto){
         HashMap<String, String> result = new HashMap<>();
         result = depositService.addDepositComment(depositId, authToken, depositCommentRequestDto);
@@ -60,7 +60,7 @@ public class DepositController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글수정", notes = "")
-    @PutMapping(value = "/depositmoney/comments/modify/{commentId}")
+    @PatchMapping(value = "/depositmoney/comments/{commentId}")
     public SingleResponseDto modifyComment(@PathVariable Long commentId, @RequestHeader("X_AUTH_TOKEN") String authToken, @RequestBody DepositCommentRequestDto depositCommentRequestDto){
         HashMap<String, String> result = new HashMap<>();
         result = depositService.modifyDepositComment(commentId, authToken, depositCommentRequestDto);
@@ -71,7 +71,7 @@ public class DepositController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "X_AUTH_TOKEN", value = "로그인 성공 후 access_token", required = false, dataType = "String", paramType = "header") })
     @ApiOperation(value = "댓글삭제", notes = "")
-    @DeleteMapping(value = "/depositmoney/comments/delete/{commentId}")
+    @DeleteMapping(value = "/depositmoney/comments/{commentId}")
     public SingleResponseDto deleteComment(@PathVariable Long commentId, @RequestHeader("X_AUTH_TOKEN") String authToken){
         HashMap<String, String> result = new HashMap<>();
         result = depositService.deleteDepositComment(commentId, authToken);
