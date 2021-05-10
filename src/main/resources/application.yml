@@ -3,7 +3,7 @@ mybatis:
     map-underscore-to-camel-case: true
 spring:
   profiles:
-    active: prod
+    active: dev
   batch:
     job:
       names: ${job.name:NONE}
@@ -56,7 +56,7 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/myhome?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf-8
       password: wowjddl1
-      username: root
+      username: hjj19911
 
 
 --- #운영 설정
